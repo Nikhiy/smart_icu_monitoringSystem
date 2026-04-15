@@ -6,3 +6,6 @@ tensorflow
 numpy
 joblib
 keras
+python-dotenv
+scikit-learn
+sentence-transformers

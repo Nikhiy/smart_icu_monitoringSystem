@@ -88,6 +88,7 @@ import VitalsChart from "./VitalsChart";
 import ECGWaveform from "./ECGWaveform";
 import AlertBanner from "../ui/AlertBanner";
 import BuzzerToggle from "../ui/BuzzerToggle";
+import ChatBot from "../ui/ChatBot";
 import PatientInfo from "./PatientInfo";
 import PatientForm from "./PatientForm";
 import MockDataSimulator from "./MockDataSimulator";
@@ -336,6 +337,9 @@ const ICUMonitor = () => {
           </div>
         </div>
       </div>
+      
+      {/* ChatBot Floating Widget */}
+      <ChatBot patientData={vitals} />
     </div>
   );
 };

@@ -7,9 +7,9 @@
 #include "heartRate.h"
 
 // === WiFi Credentials ===
-const char* ssid = "Ss";
-const char* password = "22334455";
-const char* server = "http://192.168.195.148:5000/send-data";
+const char* ssid = "YOUR_WIFI_SSID";          // Replace with your WiFi SSID
+const char* password = "YOUR_WIFI_PASSWORD";  // Replace with your WiFi password
+const char* server = "http://<BACKEND_IP>:5000/send-data"; // Replace <BACKEND_IP> with your machine's backend IP
 
 #define ECG_PIN     34
 #define LM35_PIN    35

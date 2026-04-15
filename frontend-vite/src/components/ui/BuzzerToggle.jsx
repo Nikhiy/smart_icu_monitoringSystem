@@ -9,9 +9,10 @@ const BuzzerToggle = ({ isOn = false }) => {
   const handleToggle = async () => {
     const newMuted = !isMuted;
     setIsLoading(true);
+    const esp32Host = import.meta.env.VITE_ESP32_HOST || "http://<ESP32_IP>";
 
     try {
-      const response = await fetch("http://192.168.70.148/mute-buzzer", {
+      const response = await fetch(`${esp32Host}/mute-buzzer`, {
         method: "POST",
         headers: {
           "Content-Type": "text/plain",
