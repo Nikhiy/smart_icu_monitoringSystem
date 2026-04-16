@@ -19,7 +19,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 APP_HOST = os.getenv("BACKEND_HOST", "0.0.0.0")
-APP_PORT = int(os.getenv("BACKEND_PORT", 5000))
+APP_PORT = int(os.getenv("PORT", 5000))
 MODEL_DIR = os.getenv("MODEL_DIR", "model")
 LSTM_MODEL_PATH = os.path.join(MODEL_DIR, "icu_lstm_model.h5")
 SCALER_PATH = os.path.join(MODEL_DIR, "scaler.save")
