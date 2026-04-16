@@ -2,6 +2,9 @@ flask
 flask-socketio
 flask-cors
 eventlet
+gevent
+gevent-websocket
+gunicorn
 numpy
 joblib
 python-dotenv
