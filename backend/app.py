@@ -81,19 +81,31 @@ def receive_data():
         else:
             raise ValueError("Latest sequence item must contain 5 or 6 values")
 
+        # The LSTM model was trained on 5 features: temperature, heart rate, SpO2, systolic BP, ECG.
+        # If the simulator sends 6 values, we preserve diastolic for display and alerts,
+        # but only send the 5 expected features to the scaler/model.
         input_features = np.array([
             temperature,
             heart_rate,
             spo2,
             systolic,
-            diastolic,
             ecg
         ])
+
+        display_vitals = {
+            'temperature': temperature,
+            'heart_rate': heart_rate,
+            'spo2': spo2,
+            'systolic': systolic,
+            'diastolic': diastolic,
+            'ecg': ecg
+        }
 
         prediction = None
         alert = False
 
         if USE_TENSORFLOW:
+            print(f"🔧 Model input features ({len(input_features)}): {input_features}")
             scaled_input = scaler.transform([input_features])[0]
             sequence_buffer.append(scaled_input.tolist())
             if len(sequence_buffer) > SEQUENCE_LENGTH:
@@ -108,6 +120,10 @@ def receive_data():
                     prediction = float(raw_prediction)
                 alert = prediction > ALERT_THRESHOLD
                 print(f"🧠 LSTM Prediction: {prediction:.4f} (Alert: {alert})")
+            else:
+                prediction = 0.0
+                alert = False
+                print(f"🔧 Waiting for full buffer ({len(sequence_buffer)}/{SEQUENCE_LENGTH}) - default prediction={prediction}")
         else:
             vitals_dict = {
                 'temperature': temperature,

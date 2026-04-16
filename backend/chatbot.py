@@ -26,10 +26,46 @@ class ICUChatbot:
         # Intent patterns and responses
         self.intents = {
             "heart_rate": {
-                "patterns": ["heart rate", "hr", "pulse", "bpm"],
+                "patterns": ["heart rate", "hr", "pulse", "bpm", "how fast is heart beating", "is the pulse high"],
                 "response_template": "The patient's heart rate is {heart_rate} BPM. {context}\n\n📊 Reference Ranges:\n  • Normal: 60-100 BPM\n  • Tachycardia (high): >100 BPM\n  • Bradycardia (low): <60 BPM"
             },
             "spo2": {
+                "patterns": ["oxygen", "spo2", "o2 saturation", "saturation", "blood oxygen", "oxygen level"],
+                "response_template": "Oxygen saturation (SpO₂) is at {spo2}%. {context}\n\n📊 Reference Ranges:\n  • Normal: 95-100%\n  • Acceptable: 90-95%\n  • Critical: <90%"
+            },
+            "temperature": {
+                "patterns": ["temperature", "temp", "fever", "body temp", "is the patient warm"],
+                "response_template": "Patient temperature is {temperature}°C. {context}\n\n📊 Reference Ranges:\n  • Normal: 36.5-37.5°C\n  • Hypothermia: <36°C\n  • Fever: >38°C"
+            },
+            "blood_pressure": {
+                "patterns": ["blood pressure", "bp", "systolic", "diastolic", "hypertension", "pressure"],
+                "response_template": "Blood pressure is {bp_systolic}/{bp_diastolic} mmHg. {context}\n\n📊 Reference Ranges:\n  • Normal: <120/<80 mmHg\n  • Elevated: 120-129/<80\n  • High: ≥130/≥80 mmHg"
+            },
+            "alert_status": {
+                "patterns": ["alert", "risk", "danger", "critical", "emergency", "is patient safe"],
+                "response_template": "Alert Status: {alert_status}. Risk Level: {risk_level}. {context}"
+            },
+            "patient_summary": {
+                "patterns": ["summary", "overview", "status", "how is patient", "patient status", "tell me about the patient"],
+                "response_template": "Patient Summary:\n{summary}"
+            },
+            "recommendations": {
+                "patterns": ["recommend", "suggest", "what should", "action", "intervention", "what to do"],
+                "response_template": "Based on current vitals:\n{recommendations}"
+            }
+        }
+
+        # Prepare semantic intent embeddings if model is available
+        self.intent_embeddings = {}
+        if USE_SEMANTIC:
+            try:
+                for intent, data in self.intents.items():
+                    self.intent_embeddings[intent] = SEMANTIC_MODEL.encode(
+                        data["patterns"], convert_to_tensor=True
+                    )
+            except Exception as e:
+                print(f"⚠️ Failed to build semantic intent embeddings: {e}")
+                self.intent_embeddings = {}
                 "patterns": ["oxygen", "spo2", "o2 saturation", "saturation"],
                 "response_template": "Oxygen saturation (SpO₂) is at {spo2}%. {context}\n\n📊 Reference Ranges:\n  • Normal: 95-100%\n  • Acceptable: 90-95%\n  • Critical: <90%"
             },
@@ -136,31 +172,30 @@ Status: {self._get_context()}
         """Match query to intent using keyword matching or semantic similarity"""
         query_lower = query.lower()
         
-        # Keyword-based matching
+# Semantic matching if available
+        if USE_SEMANTIC and self.intent_embeddings:
+            try:
+                query_embedding = SEMANTIC_MODEL.encode(query, convert_to_tensor=True)
+                best_intent = None
+                best_score = -1
+                
+                for intent, embeddings in self.intent_embeddings.items():
+                    scores = util.pytorch_cos_sim(query_embedding, embeddings)
+                    score = float(scores.max())
+                    if score > best_score:
+                        best_score = score
+                        best_intent = intent
+                
+                if best_intent and best_score > 0.45:
+                    return best_intent
+            except Exception as e:
+                print(f"Semantic matching error: {e}")
+
+        # Keyword-based matching fallback
         for intent, data in self.intents.items():
             for pattern in data["patterns"]:
                 if pattern.lower() in query_lower:
                     return intent
-        
-        # Semantic matching if available
-        if USE_SEMANTIC:
-            try:
-                query_embedding = SEMANTIC_MODEL.encode(query, convert_to_tensor=True)
-                best_intent = None
-                best_score = 0
-                
-                for intent, data in self.intents.items():
-                    for pattern in data["patterns"]:
-                        pattern_embedding = SEMANTIC_MODEL.encode(pattern, convert_to_tensor=True)
-                        score = util.pytorch_cos_sim(query_embedding, pattern_embedding).item()
-                        if score > best_score:
-                            best_score = score
-                            best_intent = intent
-                
-                if best_score > 0.5 and best_intent:
-                    return best_intent
-            except Exception as e:
-                print(f"Semantic matching error: {e}")
         
         return None
     

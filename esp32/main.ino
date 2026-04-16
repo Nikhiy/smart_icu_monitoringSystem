@@ -5,15 +5,14 @@
 #include <Adafruit_BMP085.h>
 #include "MAX30105.h"
 #include "heartRate.h"
+#include "config.h"  // Load configuration from config.h
 
-// === WiFi Credentials ===
-const char* ssid = "YOUR_WIFI_SSID";          // Replace with your WiFi SSID
-const char* password = "YOUR_WIFI_PASSWORD";  // Replace with your WiFi password
-const char* server = "http://<BACKEND_IP>:5000/send-data"; // Replace <BACKEND_IP> with your machine's backend IP
-
-#define ECG_PIN     34
-#define LM35_PIN    35
-#define BUZZER_PIN  25
+// === WiFi & Backend Configuration ===
+// All settings now in config.h - edit that file to reconfigure
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
+const char* server = BACKEND_URL;
+const char* deviceId = DEVICE_ID;
 
 Adafruit_BMP085 bmp;
 MAX30105 max30102;
