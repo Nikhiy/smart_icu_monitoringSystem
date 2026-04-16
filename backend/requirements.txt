@@ -2,10 +2,8 @@ flask
 flask-socketio
 flask-cors
 eventlet
-tensorflow
 numpy
 joblib
-keras
 python-dotenv
 scikit-learn
 sentence-transformers
